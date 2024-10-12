@@ -19,11 +19,18 @@
                     <h5 class="card-title">{{ $book->title }}</h5>
                     <p class="card-text">{{ $book->description }}</p>
                 </div>
+
+                <h3>Author</h3>
+                <p>{{ $book->author->name }}</p>
+                <a href="{{ route('authors.show', $book->author->id) }}" class="btn btn-info btn-sm">View Author</a>
+
+
                 <div class="col-md-2">
                     <p class="card-text"><strong>Price:</strong> ${{ $book->price }}</p>
                     <p><strong>Published Date:</strong> 
                             {{ $book->published_at ? $book->published_at->format('Y-m-d') : 'N/A' }}
-                        </p>                </div>
+                    </p>                
+                </div>
             </div>
         </div>
     </div>
@@ -57,10 +64,10 @@
             <a href="{{ route('books.index') }}" class="btn btn-secondary">Back to List</a>
 
             <!-- Edit Button -->
-            <a href="{{ route('books.edit', $book->id) }}" class="btn btn-primary">Edit Book</a>
+            <a href="{{ route('books.edit', $book->slug) }}" class="btn btn-primary">Edit Book</a>
 
             <!-- Delete Button -->
-            <form action="{{ route('books.destroy', $book->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this book?');">
+            <form action="{{ route('books.destroy', $book->slug) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this book?');">
                 @csrf
                 @method('DELETE')
                 <button type="submit" class="btn btn-danger">Delete Book</button>

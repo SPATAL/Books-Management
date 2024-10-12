@@ -10,6 +10,7 @@ class CreateBooksTable extends Migration
     if (!Schema::hasTable('books')) {
         Schema::create('books', function (Blueprint $table) {
             $table->id();
+            $table->string('slug')->unique()->nullable();
             $table->string('title');
             $table->text('description');
             $table->decimal('price', 8, 2);

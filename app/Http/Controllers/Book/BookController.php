@@ -10,136 +10,116 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Collection;
 
+
 class BookController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        $books = Book::paginate(10);
+        $books = Book::with('author')->paginate(10);
         return view('book.admin.index', compact('books'));
     }
 
-    /**
-     * Show the form for creating a new book.
-     */
     public function create()
     {
-        return view('book.admin.create');
+        $authors = Author::orderBy('name', 'asc')->get();
+        return view('book.admin.create', compact('authors'));
     }
 
-    /**
-     * Store a newly created book in storage.
-     */
     public function store(Request $request)
     {
-        // Step 1: Validate the incoming request data
         $request->validate([
-            'title'        => 'required|string|max:255',
-            'description'  => 'required|string',
-            'price'        => 'required|numeric',
-            'image'        => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Image validation
-            'pdf'          => 'nullable|mimes:pdf|max:10000', // PDF validation
-            //'author_id'    => 'required|integer',
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'price' => 'required|numeric',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'pdf' => 'nullable|mimes:pdf|max:10000',
+            'author_id' => 'required|exists:authors,id',
             'published_at' => 'nullable|date',
         ]);
 
-        $slug= Str::slug($request->title,'-');
-        //set image Name and move it to images folder
-        $newImageName = uniqid().'-'.$slug.'.'.$request->image->extension();
-        $request->image->move(public_path('images'), $newImageName);
-        //set pdf Name and move it to images folder
-        $newPdfName = uniqid().'-'.$slug.'.'.$request->pdf->extension();
-        $request->pdf->move(public_path('pdfs'), $newPdfName);
+        $slug = Str::slug($request->title, '_');
+        $newImageName = $request->hasFile('image') ? uniqid().'-'.$slug.'.'.$request->image->extension() : null;
+        $newPdfName = $request->hasFile('pdf') ? uniqid().'-'.$slug.'.'.$request->pdf->extension() : null;
 
-        // Step 4: Insert the book record into the database
-            Book::create([
-                'title'        => $request->input('title'),
-                'description'  => $request->input('description'),
-                'price'        => $request->input('price'),
-                'image'        => $newImageName, // Assign image filename
-                'pdf'          => $newPdfName,   // Assign PDF filename
-                'published_at' => $request->input('published_at'),
-            ]);
-        
+        if ($newImageName) $request->image->move(public_path('images'), $newImageName);
+        if ($newPdfName) $request->pdf->move(public_path('pdfs'), $newPdfName);
 
-        // Step 5: Redirect to the index page with a success message
+        Book::create([
+            'slug' => $slug,
+            'title' => $request->title,
+            'description' => $request->description,
+            'price' => $request->price,
+            'image' => $newImageName,
+            'pdf' => $newPdfName,
+            'author_id' => $request->author_id,
+            'published_at' => $request->published_at,
+        ]);
+
         return redirect()->route('books.index')->with('success', 'Book added successfully!');
     }
 
-    // Implement other resource methods (show, edit, update, destroy) as needed
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show($slug)
     {
-        // Find the book by ID, or return 404 if not found
-        $book = Book::findOrFail($id);
-        
-        // Pass the $book variable to the view
+        $book = Book::where('slug', $slug)->firstOrFail();
         return view('book.admin.show', compact('book'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function edit($slug)
     {
-        // Find the book by ID
-        $book = Book::findOrFail($id); // This will throw a 404 if the book is not found
-        // Pass the book to the edit view
-        return view('book.admin.edit', compact('book'));    
+        $book = Book::where('slug', $slug)->firstOrFail();
+        $authors = Author::orderBy('name', 'asc')->get();
+        return view('book.admin.edit', compact('book', 'authors'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $slug)
     {
+        $book = Book::where('slug', $slug)->firstOrFail();
+
         $request->validate([
-            'title'        => 'required|string|max:255',
-            'description'  => 'required|string',
-            'price'        => 'required|numeric',
-            //'image'        => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Image validation
-            //'pdf'          => 'nullable|mimes:pdf|max:10000', // PDF validation
-            //'author_id'    => 'required|integer',
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'price' => 'required|numeric',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'pdf' => 'nullable|mimes:pdf|max:10000',
+            'author_id' => 'required|exists:authors,id',
             'published_at' => 'nullable|date',
         ]);
 
-        $book = Book::findOrFail($id);
-
-        // Update the book's attributes
-        $book->title = $request->title;
-        $book->description = $request->description;
-        $book->price = $request->price;
-        $book->published_at = $request->published_at;
-
-        // Check if a new image is uploaded
+        $slug = Str::slug($request->title, '_');
+        $newImageName = $book->image;
         if ($request->hasFile('image')) {
-            $book->image = $request->file('image')->store('images'); // Store the new image
+            if ($book->image) unlink(public_path('images/'.$book->image));
+            $newImageName = uniqid().'-'.$slug.'.'.$request->image->extension();
+            $request->image->move(public_path('images'), $newImageName);
         }
 
-        // Check if a new PDF is uploaded
+        $newPdfName = $book->pdf;
         if ($request->hasFile('pdf')) {
-            $book->pdf = $request->file('pdf')->store('pdfs'); // Store the new PDF
+            if ($book->pdf) unlink(public_path('pdfs/'.$book->pdf));
+            $newPdfName = uniqid().'-'.$slug.'.'.$request->pdf->extension();
+            $request->pdf->move(public_path('pdfs'), $newPdfName);
         }
 
-        $book->save(); // Save the changes to the database
+        $book->update([
+            'slug' => $slug,
+            'title' => $request->title,
+            'description' => $request->description,
+            'price' => $request->price,
+            'image' => $newImageName,
+            'pdf' => $newPdfName,
+            'author_id' => $request->author_id,
+            'published_at' => $request->published_at,
+        ]);
 
-        return redirect()->route('books.index')->with('success', 'Book updated successfully!'); // Redirect back with a success message
-    
+        return redirect()->route('books.index')->with('success', 'Book updated successfully!');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy($slug)
     {
-        $books = Book::findOrFail($id);
-        $books->delete();
+        $book = Book::where('slug', $slug)->firstOrFail();
+        if ($book->image) unlink(public_path('images/'.$book->image));
+        if ($book->pdf) unlink(public_path('pdfs/'.$book->pdf));
+        $book->delete();
         return redirect()->route('books.index')->with('success', 'Book deleted successfully.');
-
     }
 }

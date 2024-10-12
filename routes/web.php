@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Book\BookController;
 use App\Http\Controllers\UserListController;
 use App\Http\Controllers\AdminController;
-
+use App\Http\Controllers\AuthorController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,10 +23,6 @@ Route::get('/', function () {
 });
 
 
-use App\Http\Controllers\ImageController;
-
-Route::resource('imagez', ImageController::class);
-
 Auth::routes();
 
 
@@ -35,11 +31,22 @@ Route::prefix('admin')->middleware('admin')->group(function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
     
     // Book Management
-    Route::resource('books', BookController::class);
+
+    Route::get('/books', [BookController::class, 'index'])->name('books.index');
+    Route::get('/books/create', [BookController::class, 'create'])->name('books.create');
+    Route::get('/books/{slug}', [BookController::class, 'show'])->name('books.show');
+    Route::post('/books', [BookController::class, 'store'])->name('books.store');
+    Route::get('/books/{slug}/edit', [BookController::class, 'edit'])->name('books.edit');
+    Route::put('/books/{slug}', [BookController::class, 'update'])->name('books.update');
+    Route::delete('/books/{slug}', [BookController::class, 'destroy'])->name('books.destroy');
+
+    //Route::resource('books', BookController::class);
     
     // User Management
     Route::resource('users', UserListController::class)->except(['create', 'store']);
 
+    // Author Management
+    Route::resource('authors', AuthorController::class);
 });
 
 Route::get('/user', [App\Http\Controllers\HomeController::class, 'user'])->name('user');

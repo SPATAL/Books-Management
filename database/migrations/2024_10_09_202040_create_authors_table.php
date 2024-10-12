@@ -12,7 +12,7 @@ class CreateAuthorsTable extends Migration
             $table->id();
             $table->string('name');
             $table->text('bio')->nullable();
-            //$table->string('website')->nullable();
+            $table->string('picture')->nullable();
             $table->timestamps();
         });
     }

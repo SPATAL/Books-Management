@@ -30,7 +30,7 @@
 
                 <!-- Description -->
                 <div class="mb-3">
-                    <label for="description" class="form-label">Book Description</label>
+                    <label for="description" class="form-label">Book Description <span class="text-danger">*</span></label>
                     <textarea class="form-control" id="description" name="description" rows="4" required>{{ old('description') }}</textarea>
                     @error('description')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -64,6 +64,21 @@
                     @enderror
                 </div>
 
+                <!-- Author Selection -->
+                <div class="form-group mb-3">
+                    <label for="author_id">Author<span class="text-danger">*</span></label>
+                    <select name="author_id" class="form-control" required>
+                        <option value="">-- Select Author --</option>
+                        @foreach($authors as $author)
+                            <option value="{{ $author->id }}" {{ old('author_id') == $author->id ? 'selected' : '' }}>
+                                {{ $author->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('author_id')
+                        <small class="text-danger">{{ $message }}</small>
+                    @enderror
+                </div>
                 
 
                 <!-- Published At -->
