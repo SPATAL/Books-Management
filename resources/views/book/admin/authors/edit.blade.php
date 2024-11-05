@@ -4,14 +4,14 @@
 <div class="container">
     <h1 class="mb-4">Edit Author: {{ $author->name }}</h1>
 
-    <form action="{{ route('authors.update', $author->id) }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ route('authors.update', $author->slug) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
 
         <!-- Name -->
         <div class="form-group mb-3">
             <label for="name">Name<span class="text-danger">*</span></label>
-            <input type="text" name="name" value="{{ old('name', $author->name) }}" class="form-control" required>
+            <input type="text" name="name" value="{{ old('name', $author->name) }}" class="form-control" >
             @error('name')
                 <small class="text-danger">{{ $message }}</small>
             @enderror

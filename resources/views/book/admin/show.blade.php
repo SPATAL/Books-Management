@@ -22,9 +22,9 @@
 
                 <h3>Author</h3>
                 <p>{{ $book->author->name }}</p>
-                <a href="{{ route('authors.show', $book->author->id) }}" class="btn btn-info btn-sm">View Author</a>
-
-
+                <div class="">
+                <a href="{{ route('authors.show', $book->author->slug) }}" class="btn btn-info btn-md mb-3">View Author</a>
+</div>
                 <div class="col-md-2">
                     <p class="card-text"><strong>Price:</strong> ${{ $book->price }}</p>
                     <p><strong>Published Date:</strong> 
@@ -44,7 +44,7 @@
                     PDF Viewer
                 </button>
             </h2>
-            <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+            <div id="collapseOne" class="accordion-collapse collapse " aria-labelledby="headingOne"  data-bs-parent="#accordionExample">
                 <div class="accordion-body">
                     <iframe src="{{ asset('pdfs/'.$book->pdf) }}" width="100%" height="500px" style="max-width: 600px; border: 1px solid #ddd;">
                         This browser does not support PDFs. Please download the PDF to view it: 

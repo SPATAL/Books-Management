@@ -40,13 +40,21 @@ Route::prefix('admin')->middleware('admin')->group(function () {
     Route::put('/books/{slug}', [BookController::class, 'update'])->name('books.update');
     Route::delete('/books/{slug}', [BookController::class, 'destroy'])->name('books.destroy');
 
-    //Route::resource('books', BookController::class);
+    // Author Management
+    Route::get('/authors', [AuthorController::class, 'index'])->name('authors.index');
+    Route::get('/authors/create', [AuthorController::class, 'create'])->name('authors.create');
+    Route::get('/authors/{slug}', [AuthorController::class, 'show'])->name('authors.show');
+    Route::post('/authors', [AuthorController::class, 'store'])->name('authors.store');
+    Route::get('/authors/{slug}/edit', [AuthorController::class, 'edit'])->name('authors.edit');
+    Route::put('/authors/{slug}', [AuthorController::class, 'update'])->name('authors.update');
+    Route::delete('/authors/{slug}', [AuthorController::class, 'destroy'])->name('authors.destroy');
+
+    //Route::resource('authors', AuthorController::class);
     
     // User Management
     Route::resource('users', UserListController::class)->except(['create', 'store']);
 
-    // Author Management
-    Route::resource('authors', AuthorController::class);
+    
 });
 
 Route::get('/user', [App\Http\Controllers\HomeController::class, 'user'])->name('user');

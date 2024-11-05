@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
+
     <h1 class="mb-4">Authors</h1>
 
     <a href="{{ route('authors.create') }}" class="btn btn-success mb-3">Add New Author</a>
@@ -39,9 +39,9 @@
                         </td>
                         <td>{{ $author->books_count }}</td>
                         <td>
-                            <a href="{{ route('authors.show', $author->id) }}" class="btn btn-info btn-sm">View</a>
-                            <a href="{{ route('authors.edit', $author->id) }}" class="btn btn-warning btn-sm">Edit</a>
-                            <form action="{{ route('authors.destroy', $author->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Are you sure you want to delete this author?');">
+                            <a href="{{ route('authors.show', $author->slug) }}" class="btn btn-info btn-sm">View</a>
+                            <a href="{{ route('authors.edit', $author->slug) }}" class="btn btn-warning btn-sm">Edit</a>
+                            <form action="{{ route('authors.destroy', $author->slug) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Are you sure you want to delete this author?');">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-danger btn-sm">Delete</button>
@@ -57,5 +57,5 @@
             {{ $authors->links('pagination::bootstrap-5') }}
         </div>
     @endif
-</div>
+
 @endsection

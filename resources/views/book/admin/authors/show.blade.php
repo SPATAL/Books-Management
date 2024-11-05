@@ -48,7 +48,7 @@
 
     <!-- Action Buttons -->
     <div class="mt-3">
-        <a href="{{ route('authors.edit', $author->id) }}" class="btn btn-warning">Edit Author</a>
+        <a href="{{ route('authors.edit', $author->slug) }}" class="btn btn-warning">Edit Author</a>
         <a href="{{ route('authors.index') }}" class="btn btn-secondary">Back to Authors</a>
     </div>
 </div>

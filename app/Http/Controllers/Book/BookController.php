@@ -117,8 +117,14 @@ class BookController extends Controller
     public function destroy($slug)
     {
         $book = Book::where('slug', $slug)->firstOrFail();
-        if ($book->image) unlink(public_path('images/'.$book->image));
-        if ($book->pdf) unlink(public_path('pdfs/'.$book->pdf));
+        if ($book->image && file_exists(public_path('images/' . $book->image))) {
+            unlink(public_path('images/' . $book->image));
+        }
+    
+        // Check if the PDF file exists before deleting
+        if ($book->pdf && file_exists(public_path('pdfs/' . $book->pdf))) {
+            unlink(public_path('pdfs/' . $book->pdf));
+        }
         $book->delete();
         return redirect()->route('books.index')->with('success', 'Book deleted successfully.');
     }
